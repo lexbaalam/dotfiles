@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo ntfsfix /dev/sdb1
+
+chdsk
