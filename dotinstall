@@ -1,60 +1,69 @@
 #!/bin/bash
 
 installdotfiles() {
-	
+    
     local BASEDIR=$(dirname $0)
     cd $BASEDIR
+    FILESPATHS=$(find ./* -type f | \
+    awk '{ gsub(/\.\//,""); print }' | \
+    egrep "^config/(shell|vim)")
     
-    local I3DIR=${PWD}/config/i3
-    local I3=$HOME/.config/i3
-    local I3STATUSDIR=${PWD}/config/i3status
-    local I3STATUS=$HOME/.config/i3status
-    local BASHRCFILE=${PWD}/config/shell/bashrc
-    local BASHRC=$HOME/.bashrc
-    local FUNCTIONSFILE=${PWD}/config/shell/functions
-    local FUNCTIONS=$HOME/.functions
-    local SRCFILE=${PWD}/config/shell/src
-    local SRC=$HOME/.src
-    local ALIASESFILE=${PWD}/config/shell/aliases
-    local ALIASES=$HOME/.aliases
-    local SCRIPTSDIR=${PWD}/local/scripts
-    local SCRIPTS=$HOME/.local/scripts
-    local GNULABDIR=${PWD}/local/share/gnulab
-    local GNULAB=$HOME/.local/share/gnulab
-    
-    [[ -d $I3 ]] && rm -r $I3 2>/dev/null || true
-    [[ -d $I3STATUS ]] && rm -r $I3STATUS 2>/dev/null || true
-    [[ -d $SCRIPTS ]] && rm -r $SCRIPTS 2>/dev/null || true
-    [[ -d $GNULAB ]] && rm -r $GNULAB 2>/dev/null || true
-    [[ -f $BASHRC ]] && rm -r $BASHRC 2>/dev/null || true
-    [[ -f $FUNCTIONS ]] && rm -r $FUNCTIONS 2>/dev/null || true
-    [[ -f $ALIASES ]] && rm -r $ALIASES 2>/dev/null || true
-    [[ -f $SRC ]] && rm -r $SRC 2>/dev/null || true
-    
-    ln -sd $I3DIR $I3 2>/dev/null || true
-    ln -sd $I3STATUSDIR $I3STATUS 2>/dev/null || true
-    ln -sd $SCRIPTSDIR $SCRIPTS 2>/dev/null || true
-    ln -sd $GNULABDIR $GNULAB 2>/dev/null || true
-    ln -sf $BASHRCFILE $BASHRC 2>/dev/null || true
-    ln -sf $FUNCTIONSFILE $FUNCTIONS 2>/dev/null || true
-    ln -sf $ALIASESFILE $ALIASES 2>/dev/null || true
-    ln -sf $SRCFILE $SRC 2>/dev/null || true
-    
-    xdotool key Super_L+Shift_R+r
+    DIRSPATHS=$(find ./* -type d | \
+    awk ' { gsub(/\.\//,""); print } ' | \
+    sed -e "/local$/g; /config$/g; /shell/g; /share$/g" | \
+    grep "/*/")
 
+    for path in $FILESPATHS
+    do
+        file=$(echo "$path" | cut -d '/' -f 3)
+	[[ -f $HOME/.$file  ]] && \
+	rm -r "$HOME/.$file" 2>/dev/null || \
+	true
+
+	ln -sd "$PWD/$path" "$HOME/.$file"
+    done
+
+    for path in $DIRSPATHS
+    do
+        echo "$path"
+	[[ -d $HOME/.$path ]] && \
+	rm -r "$HOME/.$path" 2>/dev/null || \
+	true
+
+	ln -sd "$PWD/$path" "$HOME/.$path"
+    done
+
+    xdotool key Super_L+Shift_R+r
 }
 
 uninstalldotfiles() {
 
-	rm -r ~/.config/i3 2>/dev/null || true
-	rm -r ~/.config/i3status 2>/dev/null || true
-	rm -r ~/.local/scripts 2>/dev/null || true
-	rm -r ~/.local/share/gnulab 2>/dev/null || true
-	rm ~/.bashrc 2>/dev/null || true
-	rm ~/.aliases 2>/dev/null || true
-	rm ~/.functions 2>/dev/null || true
-	rm ~/.src 2>/dev/null || true
-	i3-config-wizard
+    local BASEDIR=$(dirname $0)
+    cd $BASEDIR
+
+    FILES=$(find ./* -type f | \
+    awk '{ gsub(/\.\//,""); print }' | \
+    egrep "^config/(shell|vim)" | \
+    cut -d '/' -f 3)
+
+    DIRS=$(find ./* -type d | \
+    awk '{ gsub(/\.\//,""); print }' | \
+    sed -e "/local$/g; /config$/g; /shell/g" | \
+    grep "/*/")
+
+    for file in $FILES
+    do
+        [[ -f $HOME/.$file ]] && \
+        rm "$HOME/.$file" 2>/dev/null || true
+    done
+
+    for dir in $DIRS
+    do
+       [[ -d $HOME/.$dir ]] && \
+       rm "$HOME/.$dir" 2>/dev/null || true
+    done
+
+    [[ ! -d $HOME/.config/i3 ]] && i3-config-wizard 2>/dev/null || true
 
 }
 
