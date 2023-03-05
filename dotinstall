@@ -10,7 +10,7 @@ installdotfiles() {
     
     local DIRSPATHS=$(find ./* -type d | \
     awk ' { gsub(/\.\//,""); print } ' | \
-    sed -e "/local$/g; /config$/g; /shell/g; /share$/g" | \
+    sed -e "/local$/g; /config$/g; /config\/vim/g; /shell/g; /share$/g" | \
     grep "/*/")
 
     for path in $FILESPATHS
@@ -25,13 +25,25 @@ installdotfiles() {
 
     for path in $DIRSPATHS
     do
-        echo "$path"
+        #echo "$path"
 	[[ -d $HOME/.$path ]] && \
 	rm -r "$HOME/.$path" 2>/dev/null || \
 	true
 
 	ln -sd "$PWD/$path" "$HOME/.$path"
     done
+
+    local VIMDOT=$(find ./* -type d | \
+    awk '{ gsub(/\.\//,""); print }' | \
+    egrep "vim")
+
+    local VIM=$(echo $VIMDOT | cut -d '/' -f 2)
+
+    [[ -d $HOME/.$VIM ]] && \
+    rm "$HOME/.$VIM" 2>/dev/null || \
+    true
+
+    ln -sd "$PWD/$VIMFOLDER" "$HOME/.$VIM"
 
     xdotool key Super_L+Shift_R+r
 }
@@ -48,7 +60,7 @@ uninstalldotfiles() {
 
     local DIRS=$(find ./* -type d | \
     awk '{ gsub(/\.\//,""); print }' | \
-    sed -e "/local$/g; /config$/g; /shell/g" | \
+    sed -e "/local$/g; /config$/g; /config\/vim/g; /shell/g" | \
     grep "/*/")
 
     for file in $FILES
@@ -62,6 +74,13 @@ uninstalldotfiles() {
        [[ -d $HOME/.$dir ]] && \
        rm "$HOME/.$dir" 2>/dev/null || true
     done
+
+    local VIM=$(find ./* -type d | \
+    awk '{ gsub(/\.\//,""); print }' | \
+    egrep "vim" | cut -d '/' -f 2)
+
+    [[ -d $HOME/.$VIM ]] && \
+    rm "$HOME/$.VIM" 2>/dev/null || true
 
     [[ ! -d $HOME/.config/i3 ]] && i3-config-wizard 2>/dev/null || true
 
