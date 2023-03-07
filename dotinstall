@@ -4,7 +4,8 @@ installdotfiles() {
     
     local BASEDIR=$(dirname $0)
     cd $BASEDIR
-    FILESPATHS=$(find ./* -type f | \
+    
+    local FILESPATHS=$(find ./* -type f | \
     awk '{ gsub(/\.\//,""); print }' | \
     egrep "^config/(shell|vim\/vimrc)")
     
@@ -22,6 +23,15 @@ installdotfiles() {
 
 	ln -sd "$PWD/$path" "$HOME/.$file"
     done
+
+    local WALLPAPER=$(find ./* -name wallpaper.png | \
+    awk '{ gsub(/\.\//,""); print }') 
+    
+    [[ -f $HOME/.${WALLPAPER%.*} ]] && \
+    rm "$HOME/.$WALLPAPER" 2>/dev/null || \
+    true
+
+    ln -sd "$PWD/$WALLPAPER" "$HOME/.${WALLPAPER%.*}"
 
     for path in $DIRSPATHS
     do
@@ -60,7 +70,7 @@ uninstalldotfiles() {
 
     local DIRS=$(find ./* -type d | \
     awk '{ gsub(/\.\//,""); print }' | \
-    sed -e "/local$/g; /config$/g; /config\/vim/g; /shell/g" | \
+    sed -e "/local\/share/g; /config$/g; /config\/vim/g; /shell/g" | \
     grep "/*/")
 
     for file in $FILES
@@ -75,12 +85,18 @@ uninstalldotfiles() {
        rm "$HOME/.$dir" 2>/dev/null || true
     done
 
+    local WALLPAPER=$(find ./* -name wallpaper.png | \
+    awk '{ gsub(/\.\//,""); print }') 
+    
+    [[ -f $HOME/.${WALLPAPER%.*} ]] | \
+    rm "$HOME/.${WALLPAPER%.*}" 2>/dev/null || true
+
     local VIM=$(find ./* -type d | \
     awk '{ gsub(/\.\//,""); print }' | \
     egrep "vim" | cut -d '/' -f 2)
 
     [[ -d $HOME/.$VIM ]] && \
-    rm "$HOME/$.VIM" 2>/dev/null || true
+    rm "$HOME/.$VIM" 2>/dev/null || true
 
     [[ ! -d $HOME/.config/i3 ]] && i3-config-wizard 2>/dev/null || true
 

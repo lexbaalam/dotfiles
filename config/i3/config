@@ -39,8 +39,7 @@ bindsym $mod+Shift+p exec --no-startup-id ~/.local/scripts/powermenu
 bindsym $mod+Return exec i3-sensible-terminal
 exec_always setxkbmap -layout latam
 exec_always dunst
-
-bindsym $mod+Shift+o exec ~/Workspace/bashtest/test
+exec_always --no-startup-id ~/.local/scripts/setwallpaper
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
